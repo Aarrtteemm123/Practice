@@ -1,6 +1,8 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
@@ -8,48 +10,94 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+//-----------------Main-------------------------//
 
-    Scene scene;
-    Pane root;
+    private Scene scene;
+    private Pane root;
 
-    Button startButton;
-    Label labelNameGame;
-    Label labelSizeMatrixWord;
-    Label labelMaxNumberWordsInMatrix;
-    Label labelComplexity;
-    Label labelPlayer;
-    Spinner<Integer> spinnerMaxNumberWordsInMatrix;
-    Spinner<Integer> spinnerSizeMatrixWord;
-    RadioButton rdButComputer;
-    RadioButton rdButHuman;
-    RadioButton rdButComplexityEasy;
-    RadioButton rdButComplexityHard;
+//-----------------Menu------------------------//
 
-    MenuInfo menuInfo;
+    private Button butStart;
+    private Label labNameGame;
+    private Label labSizeMatrixWord;
+    private Label labMaxNumberWordsInMatrix;
+    private Label labComplexity;
+    private Label labPlayer;
+    private Spinner<Integer> spinMaxNumberWordsInMatrix;
+    private Spinner<Integer> spinSizeMatrixWord;
+    private RadioButton rdButComputer;
+    private RadioButton rdButHuman;
+    private RadioButton rdButComplexityEasy;
+    private RadioButton rdButComplexityHard;
+
+//----------------------------------------------//
+
+//----------------GameMenu----------------------//
+
+    private Button[][] matrixWords;
+    private Button butFinishGame;
+
+//----------------------------------------------//
+
+//----------------Data--------------------------//
+
+    private MenuInfo menuInfo;
+    private int widthWindow = 1400;
+    private int heightWindow = 900;
+    private int minNumberWords = 1;
+    private int maxNumberWords = 100;
+    private int startValueWords = 5;
+    private int minSize = 3;
+    private int maxSize = 25;
+    private int startValueSize = 10;
+
+//----------------------------------------------//
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
-        startInitialSettings();
-        setPosition();
-
+    public void start(Stage primaryStage) {
+        startInitialSettingsMenu();
+        startInitialSettingsGame();
+        setVisibleGame(false);
+        setPositionInMenu();
+        setPositionInGame();
         checkEventMenu();
-        if (checkDataMenu())
-            createGame();
-
+        checkEventGame();
 
         primaryStage.setTitle("Гра слова");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    public boolean checkDataMenu()
-    {
-        return true;
-    }
-
     public void createGame()
     {
-        System.out.println("creating game...");
+        buildMatrixButton(menuInfo.getSizeMatrix(),menuInfo.getSizeMatrix());
+        setVisibleMenu(false);
+        setVisibleGame(true);
+    }
+
+    public void buildMatrixButton(int length,int height)
+    {
+        matrixWords = new Button[height][length];
+        for(int y = 0; y < height; y++)
+        {
+            for(int x = 0; x < length; x++)
+            {
+                matrixWords[x][y] = new Button("1");
+                root.getChildren().add(matrixWords[x][y]);
+                matrixWords[x][y].setMaxSize(40,40);
+                matrixWords[x][y].setMinSize(5,5);
+                matrixWords[x][y].setLayoutX(x*30+100);
+                matrixWords[x][y].setLayoutY(y*30+100);
+
+                int finalX = x;
+                int finalY = y;
+                EventHandler<ActionEvent> event = e -> {
+                    matrixWords[finalX][finalY].setStyle("-fx-background-color: #57df31");
+                };
+
+                matrixWords[x][y].setOnAction(event);
+            }
+        }
     }
 
 
@@ -75,9 +123,8 @@ public class Main extends Application {
             rdButComplexityHard.setSelected(true);
         });
 
-        startButton.setOnAction(e -> {
+        butStart.setOnAction(e -> {
             String player,complexity;
-
             if (rdButHuman.isSelected())
                 player = "Людина";
             else
@@ -87,73 +134,93 @@ public class Main extends Application {
                 complexity = "Легко";
             else
                 complexity = "Важко";
-            menuInfo = new MenuInfo(spinnerSizeMatrixWord.getValue(),
-                    spinnerMaxNumberWordsInMatrix.getValue(),player,complexity);
-            setVisibleMenu(false);
+
+            menuInfo = new MenuInfo(spinSizeMatrixWord.getValue(),
+                    spinMaxNumberWordsInMatrix.getValue(),player,complexity);
+            createGame();
         });
 
     }
 
+    public void checkEventGame()
+    {
+        butFinishGame.setOnAction(e -> {
+            setVisibleGame(false);
+            setVisibleMenu(true);
+        });
+    }
+
+    public void setVisibleGame(boolean flag)
+    {
+        butFinishGame.setVisible(flag);
+    }
+
     public void setVisibleMenu(boolean flag)
     {
-        startButton.setVisible(flag);
-        labelNameGame.setVisible(flag);
-        labelSizeMatrixWord.setVisible(flag);
-        labelMaxNumberWordsInMatrix.setVisible(flag);
-        labelComplexity.setVisible(flag);
-        labelPlayer.setVisible(flag);
-        spinnerMaxNumberWordsInMatrix.setVisible(flag);
-        spinnerSizeMatrixWord.setVisible(flag);
+        butStart.setVisible(flag);
+        labNameGame.setVisible(flag);
+        labSizeMatrixWord.setVisible(flag);
+        labMaxNumberWordsInMatrix.setVisible(flag);
+        labComplexity.setVisible(flag);
+        labPlayer.setVisible(flag);
+        spinMaxNumberWordsInMatrix.setVisible(flag);
+        spinSizeMatrixWord.setVisible(flag);
         rdButComputer.setVisible(flag);
         rdButHuman.setVisible(flag);
         rdButComplexityEasy.setVisible(flag);
         rdButComplexityHard.setVisible(flag);
     }
 
-    public void setPosition()
+    public void setPositionInMenu()
     {
-        labelNameGame.setLayoutX(500);
-        labelNameGame.setLayoutY(200);
+        labNameGame.setLayoutX(500);
+        labNameGame.setLayoutY(200);
         Font font=new Font(50);
-        labelNameGame.setFont(font);
+        labNameGame.setFont(font);
+        spinMaxNumberWordsInMatrix.setLayoutX(500);
+        spinSizeMatrixWord.setLayoutX(200);
         rdButHuman.setLayoutY(200);
         rdButComputer.setLayoutY(300);
+        rdButComplexityEasy.setLayoutY(600);
+        rdButComplexityHard.setLayoutY(800);
     }
 
-    public void startInitialSettings()
+    public void setPositionInGame()
     {
-        int widthWindow = 1400;
-        int heightWindow = 900;
-        int minNumberWords = 1;
-        int maxNumberWords = 100;
-        int startValueWords = 8;
-        int minSize = 3;
-        int maxSize = 20;
-        int startValueSize = 5;
+        butFinishGame.setLayoutX(200);
+        butFinishGame.setLayoutY(700);
+    }
 
+    public void startInitialSettingsGame()
+    {
+        butFinishGame = new Button("Завершити гру");
+        root.getChildren().add(butFinishGame);
+    }
 
+    public void startInitialSettingsMenu()
+    {
         root = new Pane();
         scene = new Scene(root, widthWindow, heightWindow);
+        menuInfo = new MenuInfo();
 
-
-        spinnerMaxNumberWordsInMatrix = new Spinner<>();
+        spinMaxNumberWordsInMatrix = new Spinner<>();
         SpinnerValueFactory<Integer> valueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory
                         (minNumberWords, maxNumberWords, startValueWords);
-        spinnerMaxNumberWordsInMatrix.setValueFactory(valueFactory);
-        spinnerMaxNumberWordsInMatrix.setEditable(true);
+        spinMaxNumberWordsInMatrix.setValueFactory(valueFactory);
+        spinMaxNumberWordsInMatrix.setEditable(true);
 
 
-        spinnerSizeMatrixWord = new Spinner<>();
+        spinSizeMatrixWord = new Spinner<>();
         valueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory
                         (minSize, maxSize, startValueSize);
-        spinnerSizeMatrixWord.setValueFactory(valueFactory);
-        spinnerSizeMatrixWord.setEditable(true);
+        spinSizeMatrixWord.setValueFactory(valueFactory);
+        spinSizeMatrixWord.setEditable(true);
 
 
-        labelSizeMatrixWord = new Label("Розмір поля");
-        labelMaxNumberWordsInMatrix = new Label("Кількість слів");
+        labSizeMatrixWord = new Label("Розмір поля");
+        labMaxNumberWordsInMatrix = new Label("Кількість слів");
 
 
         rdButComputer = new RadioButton("Комп'ютер");
@@ -168,26 +235,26 @@ public class Main extends Application {
         rdButComplexityHard.setSelected(false);
 
 
-        labelComplexity = new Label("Складність");
-        labelPlayer = new Label("Гравець");
+        labComplexity = new Label("Складність");
+        labPlayer = new Label("Гравець");
 
 
-        labelNameGame = new Label("ГРА СЛОВА");
-        startButton = new Button("Почати гру");
+        labNameGame = new Label("ГРА СЛОВА");
+        butStart = new Button("Почати гру");
 
 
-        root.getChildren().add(spinnerMaxNumberWordsInMatrix);
-        root.getChildren().add(spinnerSizeMatrixWord);
-        root.getChildren().add(labelSizeMatrixWord);
-        root.getChildren().add(labelMaxNumberWordsInMatrix);
+        root.getChildren().add(spinMaxNumberWordsInMatrix);
+        root.getChildren().add(spinSizeMatrixWord);
+        root.getChildren().add(labSizeMatrixWord);
+        root.getChildren().add(labMaxNumberWordsInMatrix);
         root.getChildren().add(rdButComputer);
         root.getChildren().add(rdButHuman);
         root.getChildren().add(rdButComplexityEasy);
         root.getChildren().add(rdButComplexityHard);
-        root.getChildren().add(labelPlayer);
-        root.getChildren().add(labelComplexity);
-        root.getChildren().add(startButton);
-        root.getChildren().add(labelNameGame);
+        root.getChildren().add(labPlayer);
+        root.getChildren().add(labComplexity);
+        root.getChildren().add(butStart);
+        root.getChildren().add(labNameGame);
     }
 
     public static void main(String[] args) {

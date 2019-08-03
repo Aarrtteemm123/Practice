@@ -7,6 +7,10 @@ public class MenuInfo {
     private String complexity;
 
     public MenuInfo() {
+        sizeMatrix=0;
+        numberWords=0;
+        player="";
+        complexity="";
     }
 
     public MenuInfo(int sizeMatrix, int numberWords, String player, String complexity) {
