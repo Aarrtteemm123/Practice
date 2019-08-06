@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -9,6 +10,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
 
 public class Main extends Application {
 //-----------------Main-------------------------//
@@ -35,7 +38,7 @@ public class Main extends Application {
 
 //----------------GameMenu----------------------//
 
-    private Button[][] matrixWords;
+    private Button[][] butMatrixWords;
     private Button butFinishGame;
     private Button butFinishStep;
     private TextArea txtArAllWords;
@@ -59,14 +62,29 @@ public class Main extends Application {
 //----------------Data--------------------------//
 
     private MenuInfo menuInfo;
-    private int widthWindow = 1400;
-    private int heightWindow = 900;
-    private int minNumberWords = 1;
-    private int maxNumberWords = 100;
-    private int startValueWords = 5;
-    private int minSize = 4;
-    private int maxSize = 20;
-    private int startValueSize = 10;
+    LogicController logicController;
+    Computer computer;
+    private int[][] matrixButtonsColor;
+    private String defaultColor;
+    private String []path={"one","two","three","four","five"};
+    private final String activeColor = "-fx-background-color: #57df31";
+    private int counter = 15;   // seconds
+    private boolean flPlayer1 = true;
+    private int scoreFirstPlayer = 0;
+    private int scoreSecondPlayer = 0;
+    private final long second = 1000000000;
+    private final int timeEasyComplexity = 16;
+    private final int timeHardComplexity = 11;
+    private final int matrixPosX = 20;
+    private final int matrixPosY = 70;
+    private final int widthWindow = 1400;
+    private final int heightWindow = 900;
+    private final int minNumberWords = 1;
+    private final int maxNumberWords = 100;
+    private final int startValueWords = 5;
+    private final int minSizeMatrix = 4;
+    private final int maxSizeMatrix = 20;
+    private final int startValueSizeMatrix = 10;
 
 //----------------------------------------------//
 
@@ -86,12 +104,60 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    protected AnimationTimer timerStep = new AnimationTimer() {
+        private long lastUpdate = 0;
+
+        @Override
+        public void handle(long now) {
+
+            if (now - lastUpdate >= second) {    // 1 sec
+                counter--;
+                labTimer.setText("Час : "+ counter +" с");
+                if (counter == 0)
+                {
+                    if (flPlayer1)
+                    {
+                        flPlayer1 = false;
+                        scoreFirstPlayer--;
+                        setDefaultMatrixColor();
+                    }
+                    else
+                    {
+                        flPlayer1 = true;
+                        scoreSecondPlayer--;
+                        setDefaultMatrixColor();
+                    }
+
+                    if (menuInfo.getComplexity().equals("Легко"))
+                        counter = timeEasyComplexity;
+                    else
+                        counter = timeHardComplexity;
+                }
+                lastUpdate = now;
+            }
+
+        }
+    };
+
+    public void setWordsInMatrixWords(ArrayList<Letter[]> codeWords)
+    {
+        for (int i = 0; i < codeWords.size(); i++)
+        {
+            for (int j = 0; j < codeWords.get(i).length; j++)
+            {
+                butMatrixWords[codeWords.get(i)[j].getY()][codeWords.get(i)[j].getX()].
+                        setText(codeWords.get(i)[j].getLetter());
+            }
+        }
+    }
+
     public void createGame()
     {
         buildMatrixButton(menuInfo.getSizeMatrix(),menuInfo.getSizeMatrix());
         setVisibleMenu(false);
         setVisibleGame(true);
         setInfoForGame();
+        timerStep.start();
     }
 
     public void setInfoForGame()
@@ -100,33 +166,75 @@ public class Main extends Application {
         labInfoNumberWords.setText("Слів : "+menuInfo.getNumberWords());
         labInfoSizeMatrix.setText("Розмір поля : "+menuInfo.getSizeMatrix()+
                 "x"+menuInfo.getSizeMatrix());
+        if (menuInfo.getPlayer().equals("Комп'ютер"))
+        {
+            labTypeFirstPlayer.setText("Гравець");
+            labTypeSecondPlayer.setText(menuInfo.getPlayer());
+        }
+        else
+        {
+            labTypeFirstPlayer.setText("Гравець 1");
+            labTypeSecondPlayer.setText("Гравець 2");
+        }
+
+        if (menuInfo.getComplexity().equals("Легко"))
+            counter = timeEasyComplexity;
+        else
+            counter = timeHardComplexity;
+
+        matrixButtonsColor = new int[menuInfo.getSizeMatrix()][menuInfo.getSizeMatrix()];
+
+        logicController = new LogicController(matrixButtonsColor,
+                menuInfo.getComplexity(),path,menuInfo.getNumberWords());
+        logicController.loadRandomWords();
+        ArrayList<Letter[]> codeWords = logicController.fillMatrixWords();
+        setWordsInMatrixWords(codeWords);
+
     }
 
     public void buildMatrixButton(int length,int height)
     {
-        matrixWords = new Button[height][length];
+        butMatrixWords = new Button[height][length];
         for(int y = 0; y < height; y++)
         {
             for(int x = 0; x < length; x++)
             {
-                matrixWords[x][y] = new Button("1");
-                root.getChildren().add(matrixWords[x][y]);
-                matrixWords[x][y].setMaxSize(40,40);
-                matrixWords[x][y].setMinSize(5,5);
-                matrixWords[x][y].setLayoutX(x*30+20);
-                matrixWords[x][y].setLayoutY(y*30+70);
+                butMatrixWords[y][x] = new Button("B");
+                root.getChildren().add(butMatrixWords[y][x]);
+                butMatrixWords[y][x].setMaxSize(40,40);
+                butMatrixWords[y][x].setMinSize(5,5);
+                butMatrixWords[y][x].setLayoutX(x*30+matrixPosX);
+                butMatrixWords[y][x].setLayoutY(y*30+matrixPosY);
 
                 int finalX = x;
                 int finalY = y;
                 EventHandler<ActionEvent> event = e -> {
-                    matrixWords[finalX][finalY].setStyle("-fx-background-color: #57df31");
+                    if (matrixButtonsColor[finalY][finalX] == 0)
+                    {
+                        butMatrixWords[finalY][finalX].setStyle(activeColor);
+                        matrixButtonsColor[finalY][finalX] = 1;
+                    }
+                    else if (matrixButtonsColor[finalY][finalX] == 1)
+                    {
+                        butMatrixWords[finalY][finalX].setStyle(defaultColor);
+                        matrixButtonsColor[finalY][finalX] = 0;
+                    }
                 };
 
-                matrixWords[x][y].setOnAction(event);
+                butMatrixWords[y][x].setOnAction(event);
             }
         }
     }
 
+    public void setDefaultMatrixColor()
+    {
+        matrixButtonsColor = new int[menuInfo.getSizeMatrix()][menuInfo.getSizeMatrix()];
+        for(int y = 0; y < butMatrixWords.length; y++)
+        {
+            for(int x = 0; x < butMatrixWords[y].length; x++)
+                butMatrixWords[y][x].setStyle(defaultColor);
+        }
+    }
 
     public void checkEventMenu()
     {
@@ -172,18 +280,41 @@ public class Main extends Application {
     public void checkEventGame()
     {
         butFinishGame.setOnAction(e -> {
+            timerStep.stop();
             removeMatrixWords();
             setVisibleGame(false);
             setVisibleMenu(true);
+        });
+        butFinishStep.setOnAction(e -> {
+            logicController.setMatrixButtonsColor(matrixButtonsColor);
+            if (logicController.checkStep()&& flPlayer1)
+                scoreFirstPlayer+=2;// first player find word
+            else if (!logicController.checkStep() && flPlayer1)
+                scoreFirstPlayer--;// first player don t find word
+            else if (logicController.checkStep() && !flPlayer1)
+                scoreSecondPlayer+=2;// second player find word
+            else if (!logicController.checkStep() && !flPlayer1)
+                scoreSecondPlayer--; // second player don t find word
+
+            labScoreFirstPlayer.setText(String.valueOf(scoreFirstPlayer));
+            labScoreSecondPlayer.setText(String.valueOf(scoreSecondPlayer));
+            flPlayer1 = !flPlayer1;
+
+            setDefaultMatrixColor();
+
+            if (menuInfo.getComplexity().equals("Легко"))
+                counter = timeEasyComplexity;
+            else
+                counter = timeHardComplexity;
         });
     }
 
     public void removeMatrixWords()
     {
-        for (int i = 0; i < matrixWords.length; i++)
+        for (int i = 0; i < butMatrixWords.length; i++)
         {
-            for (int j = 0; j < matrixWords[i].length; j++)
-                root.getChildren().remove(matrixWords[i][j]);
+            for (int j = 0; j < butMatrixWords[i].length; j++)
+                root.getChildren().remove(butMatrixWords[i][j]);
         }
     }
 
@@ -205,7 +336,7 @@ public class Main extends Application {
         labTitle.setVisible(flag);
         labInfoSizeMatrix.setVisible(flag);
         labInfoNumberWords.setVisible(flag);
-        labInfoSizeMatrix.setVisible(flag);
+        labInfoComplexity.setVisible(flag);
     }
 
     public void setVisibleMenu(boolean flag)
@@ -247,18 +378,21 @@ public class Main extends Application {
         butFinishStep.setLayoutX(900);
         txtArAllWords.setLayoutX(1000);
         txtArSecondPlayerWords.setLayoutY(300);
-        txtArFirstPlayerWords.setLayoutY(500);
-        txtArFirstPlayerWords.setLayoutX(800);
+        labTimer.setLayoutY(500);
+        labTimer.setLayoutX(800);
     }
 
     public void startInitialSettingsGame()
     {
         butFinishGame = new Button("Завершити гру");
-        butFinishStep = new Button("Заершити хід");
+        butFinishStep = new Button("Завершити хід");
 
-        txtArAllWords = new TextArea("All");
-        txtArFirstPlayerWords = new TextArea("First");
-        txtArSecondPlayerWords = new TextArea("Second");
+        txtArAllWords = new TextArea("All");//down on model
+        txtArFirstPlayerWords = new TextArea("First");//left on model
+        txtArSecondPlayerWords = new TextArea("Second");//right on model
+        //--------Size text area-----------------
+
+        //---------------------------------------
 
         lnDown = new Line(0,800,1400,800);
         lnRight = new Line(900,0,900,1000);
@@ -267,10 +401,10 @@ public class Main extends Application {
         labInfoComplexity = new Label();
         labInfoNumberWords = new Label();
         labInfoSizeMatrix = new Label();
-        labTimer = new Label();
-        labTitle = new Label();
-        labScoreFirstPlayer = new Label();
-        labScoreSecondPlayer = new Label();
+        labTimer = new Label("Час 00:15");
+        labTitle = new Label("Рахунок та слова");
+        labScoreFirstPlayer = new Label("0");
+        labScoreSecondPlayer = new Label("0");
         labTypeFirstPlayer = new Label();
         labTypeSecondPlayer = new Label();
 
@@ -313,7 +447,7 @@ public class Main extends Application {
         spinSizeMatrixWord = new Spinner<>();
         valueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory
-                        (minSize, maxSize, startValueSize);
+                        (minSizeMatrix, maxSizeMatrix, startValueSizeMatrix);
         spinSizeMatrixWord.setValueFactory(valueFactory);
         spinSizeMatrixWord.setEditable(true);
 
@@ -340,6 +474,7 @@ public class Main extends Application {
 
         labNameGame = new Label("ГРА СЛОВА");
         butStart = new Button("Почати гру");
+        defaultColor = butStart.getStyle();
 
 
         root.getChildren().add(spinMaxNumberWordsInMatrix);
