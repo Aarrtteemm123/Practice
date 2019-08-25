@@ -1,17 +1,17 @@
 package sample;
 
+import java.awt.*;
+
 public class Letter {
     private String letter;
-    private int x;
-    private int y;
+    private Point point;
 
     public Letter() {
     }
 
     public Letter(String letter, int x, int y) {
         this.letter = letter;
-        this.x = x;
-        this.y = y;
+        this.point = new Point(x,y);
     }
 
     public String getLetter() {
@@ -23,18 +23,18 @@ public class Letter {
     }
 
     public int getX() {
-        return x;
+        return point.x;
     }
 
     public void setX(int x) {
-        this.x = x;
+        this.point.x = x;
     }
 
     public int getY() {
-        return y;
+        return point.y;
     }
 
     public void setY(int y) {
-        this.y = y;
+        this.point.y = y;
     }
 }
