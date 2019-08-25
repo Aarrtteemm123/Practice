@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Computer {
+
     private String complexity;
     private Random rand = new Random();
     private float percentTrueStep;
@@ -32,19 +33,15 @@ public class Computer {
         initial(complexity);
     }
 
-    private void initial(String complexity)
-    {
-        if (complexity.equals("Легко"))
-        {
+    private void initial(String complexity) {
+        if (complexity.equals("Легко")) {
             this.percentTrueStep = 0.65f;
             this.maxTimeSleepBetweenLetter = 1000;
             this.maxTimeStartStep = 4000;
             this.percentPenalty = 0.18f;
             this.maxTimeIgnore = 7000;
             this.maxTimePenalty = 5000;
-        }
-        else
-        {
+        } else {
             this.percentTrueStep = 0.85f;
             this.maxTimeSleepBetweenLetter = 500;
             this.maxTimeStartStep = 3000;
@@ -54,39 +51,29 @@ public class Computer {
         }
     }
 
-    public int nextStep(ArrayList<Letter[]>codeWords,Button[][]butMatrix)
-    {
-        if (indexLetter == codeWords.get(indexWord).length)
-        {
+    public int nextStep(ArrayList<Letter[]> codeWords, Button[][] butMatrix) {
+        if (indexLetter == codeWords.get(indexWord).length) {
             flFinishStep = true;
             return 1;
         }
-        if (!flSelectWord)
-        {
-            if (Math.random()<percentTrueStep)
-            {
+        if (!flSelectWord) {
+            if (Math.random() < percentTrueStep) {
                 indexWord = rand.nextInt(codeWords.size());
                 flSelectWord = true;
                 return getRandomTimeStartStep();
-            }
-            else
+            } else
                 flTrueStep = false;
 
         }
-        if (flTrueStep)
-        {
-            if (Math.random()>percentPenalty)
-            {
-                if (complexity.equals("Легко"))
-                {
-                    if (percentPenalty>=0.1)
-                        percentPenalty-=0.005;
+        if (flTrueStep) {
+            if (Math.random() > percentPenalty) {
+                if (complexity.equals("Легко")) {
+                    if (percentPenalty >= 0.1)
+                        percentPenalty -= 0.005;
                     else percentPenalty = 0.1f;
-                }
-                else
-                {
-                    if (percentPenalty>=0.05)
-                        percentPenalty-=0.005;
+                } else {
+                    if (percentPenalty >= 0.05)
+                        percentPenalty -= 0.005;
                     else percentPenalty = 0.05f;
                 }
                 butMatrix[codeWords.get(indexWord)[indexLetter].getY()]
@@ -97,14 +84,10 @@ public class Computer {
                         [codeWords.get(indexWord)[indexLetter].getX()].setDisable(true);
                 indexLetter++;
                 return getRandomTimeSleepBetweenLetter();
-            }
-            else
-            {
+            } else {
                 return getRandomTimePenalty();
             }
-        }
-        else
-        {
+        } else {
             flFinishStep = true;
             return getRandomTimeIgnore();
         }
@@ -114,8 +97,7 @@ public class Computer {
         return flFinishStep;
     }
 
-    public void finishStep()
-    {
+    public void finishStep() {
         flSelectWord = false;
         flTrueStep = true;
         flFinishStep = false;

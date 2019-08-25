@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.*;
 
 public class LogicController {
+
     private ArrayList<String> vocabulary;
     private ArrayList<Letter[]> codeWords;
     private Letter[][] matrixLetter;
@@ -16,9 +17,9 @@ public class LogicController {
     private int realNumberWords;
     private boolean flFinish = false;
 
-    public ArrayList<Letter[]> fillMatrixWords(int sizeMatrix,int maxLayer) throws IOException, ClassNotFoundException {
+    public ArrayList<Letter[]> fillMatrixWords(int sizeMatrix, int maxLayer) throws IOException, ClassNotFoundException {
         // hard logic
-        if (maxLayer<1)
+        if (maxLayer < 1)
             maxLayer = 1;
 
         Random rand = new Random();
@@ -29,14 +30,13 @@ public class LogicController {
         final int size = 8;
         final double[] vectorMoveArr = createProbabilityArr(size);
         final boolean[] flVectorMoveArr = new boolean[size];
-        int [][]matrixLayer = new int[sizeMatrix][sizeMatrix];
-        for (int i = 0; i < vocabulary.size(); i++)
-        {
+        int[][] matrixLayer = new int[sizeMatrix][sizeMatrix];
+        for (int i = 0; i < vocabulary.size(); i++) {
             int x, y;
             String bufferWord = vocabulary.get(i);
             Letter[] word = new Letter[bufferWord.length()];
             ArrayList<Move> blockStep = new ArrayList<>();
-            int []stepArr = new int[bufferWord.length()];
+            int[] stepArr = new int[bufferWord.length()];
             stepArr[0] = -1;//first letter don't move
             int indexChar = 0;
             int indexMove = 0;
@@ -47,8 +47,7 @@ public class LogicController {
             x = rand.nextInt(sizeMatrix);
             y = rand.nextInt(sizeMatrix);
             while (!checkPlace(x, y, indexMove, blockStep, String.valueOf(
-                    bufferWord.charAt(indexChar)), indexChar, matrixLayer, maxLayer))
-            {
+                    bufferWord.charAt(indexChar)), indexChar, matrixLayer, maxLayer)) {
                 x = rand.nextInt(sizeMatrix);
                 y = rand.nextInt(sizeMatrix);
             }
@@ -59,12 +58,10 @@ public class LogicController {
                     String.valueOf(bufferWord.charAt(indexChar)), x, y);
             indexChar++;
 
-            while (indexChar < bufferWord.length())
-            {
-                if (counterFlMoveControl>10000)
+            while (indexChar < bufferWord.length()) {
+                if (counterFlMoveControl > 10000)
                     return null;
-                if (flMoveControl && checkMoveArr(flVectorMoveArr))
-                {
+                if (flMoveControl && checkMoveArr(flVectorMoveArr)) {
                     // step back
                     indexChar--;
                     if (indexChar == 0) {
@@ -106,8 +103,7 @@ public class LogicController {
                 flVectorMoveArr[indexMove] = true;
                 flMoveControl = true;
                 if (checkPlace(x, y, indexMove, blockStep, String.valueOf(
-                        bufferWord.charAt(indexChar)), indexChar, matrixLayer, maxLayer))
-                {
+                        bufferWord.charAt(indexChar)), indexChar, matrixLayer, maxLayer)) {
                     x = rewriteX(x, indexMove);
                     y = rewriteY(y, indexMove);
                     matrixLayer[y][x]++;
@@ -130,34 +126,29 @@ public class LogicController {
     private void selectionWords(int sizeMatrix) throws IOException, ClassNotFoundException {
         int counterChar = 0;
         for (int i = 0; i < vocabulary.size(); i++)
-            counterChar+=vocabulary.get(i).length();
-        if (counterChar>sizeMatrix*sizeMatrix)
-        {
+            counterChar += vocabulary.get(i).length();
+        if (counterChar > sizeMatrix * sizeMatrix) {
             ArrayList<String> allWords = getAllWords();
             Comparator<String> comparator = Comparator.comparing(String::length);
             allWords.sort(comparator);
             vocabulary.sort(comparator);
             int index = 1;
-            for (int i = 0; i < vocabulary.size(); i++)
-            {
-                if (!vocabulary.contains(allWords.get(i)))
-                {
-                    counterChar-=vocabulary.get(vocabulary.size()-i-1).length()-
+            for (int i = 0; i < vocabulary.size(); i++) {
+                if (!vocabulary.contains(allWords.get(i))) {
+                    counterChar -= vocabulary.get(vocabulary.size() - i - 1).length() -
                             allWords.get(i).length();
-                    vocabulary.set(vocabulary.size()-index,allWords.get(i));
+                    vocabulary.set(vocabulary.size() - index, allWords.get(i));
                     index++;
                 }
-                if (counterChar<=sizeMatrix*sizeMatrix)
-                    i=vocabulary.size();
+                if (counterChar <= sizeMatrix * sizeMatrix)
+                    i = vocabulary.size();
             }
             vocabulary.sort(comparator);
-            for (int i = 0; i < vocabulary.size(); i++)
-            {
-                if (counterChar>sizeMatrix*sizeMatrix)
-                {
-                    counterChar-=vocabulary.get(vocabulary.size()-1).length();
-                    vocabulary.remove(vocabulary.size()-1);
-                    i=0;
+            for (int i = 0; i < vocabulary.size(); i++) {
+                if (counterChar > sizeMatrix * sizeMatrix) {
+                    counterChar -= vocabulary.get(vocabulary.size() - 1).length();
+                    vocabulary.remove(vocabulary.size() - 1);
+                    i = 0;
                 }
             }
         }
@@ -168,10 +159,9 @@ public class LogicController {
         ArrayList<String> allWords = new ArrayList<>();
         ArrayList<String> buffer;
 
-        for (int i = 0; i < path.length; i++)
-        {
+        for (int i = 0; i < path.length; i++) {
             FileInputStream fis = new FileInputStream(path[i]);
-            ObjectInputStream read = new ObjectInputStream (fis);
+            ObjectInputStream read = new ObjectInputStream(fis);
             buffer = (ArrayList) read.readObject();
             read.close();
             fis.close();
@@ -182,66 +172,57 @@ public class LogicController {
     }
 
 
-    private boolean checkMoveArr(boolean arr[])
-    {
-        for (int i = 0; i < arr.length; i++)
-        {
+    private boolean checkMoveArr(boolean arr[]) {
+        for (int i = 0; i < arr.length; i++) {
             if (!arr[i])
                 return false;
         }
         return true;
     }
 
-    private int rewriteX(int x,int indexMoveArr)
-    {
-        if (indexMoveArr==1||indexMoveArr==2||indexMoveArr==3)
-            return x+1;
-        if (indexMoveArr==5||indexMoveArr==6||indexMoveArr==7)
-            return x-1;
+    private int rewriteX(int x, int indexMoveArr) {
+        if (indexMoveArr == 1 || indexMoveArr == 2 || indexMoveArr == 3)
+            return x + 1;
+        if (indexMoveArr == 5 || indexMoveArr == 6 || indexMoveArr == 7)
+            return x - 1;
         return x;
     }
 
-    private int rewriteY(int y,int indexMoveArr)
-    {
-        if (indexMoveArr==3||indexMoveArr==4||indexMoveArr==5)
-            return y+1;
-        if (indexMoveArr==0||indexMoveArr==1||indexMoveArr==7)
-            return y-1;
+    private int rewriteY(int y, int indexMoveArr) {
+        if (indexMoveArr == 3 || indexMoveArr == 4 || indexMoveArr == 5)
+            return y + 1;
+        if (indexMoveArr == 0 || indexMoveArr == 1 || indexMoveArr == 7)
+            return y - 1;
         return y;
     }
 
-    private int backRewriteX(int x,int indexMoveArr)
-    {
-        if (indexMoveArr==1||indexMoveArr==2||indexMoveArr==3)
-            return x-1;
-        if (indexMoveArr==5||indexMoveArr==6||indexMoveArr==7)
-            return x+1;
+    private int backRewriteX(int x, int indexMoveArr) {
+        if (indexMoveArr == 1 || indexMoveArr == 2 || indexMoveArr == 3)
+            return x - 1;
+        if (indexMoveArr == 5 || indexMoveArr == 6 || indexMoveArr == 7)
+            return x + 1;
         return x;
     }
 
-    private int backRewriteY(int y,int indexMoveArr)
-    {
-        if (indexMoveArr==3||indexMoveArr==4||indexMoveArr==5)
-            return y-1;
-        if (indexMoveArr==0||indexMoveArr==1||indexMoveArr==7)
-            return y+1;
+    private int backRewriteY(int y, int indexMoveArr) {
+        if (indexMoveArr == 3 || indexMoveArr == 4 || indexMoveArr == 5)
+            return y - 1;
+        if (indexMoveArr == 0 || indexMoveArr == 1 || indexMoveArr == 7)
+            return y + 1;
         return y;
     }
 
-    private boolean checkPlace(int x, int y, int indexMoveArr, ArrayList<Move>blockSteps, String letter, int indexLetter,int[][] matrixLayer,int maxLayer)
-    {
+    private boolean checkPlace(int x, int y, int indexMoveArr, ArrayList<Move> blockSteps, String letter, int indexLetter, int[][] matrixLayer, int maxLayer) {
         int size = matrixLetter.length;
         if (indexLetter == 0)
             return matrixLayer[y][x] < maxLayer && (matrixLetter[y][x].getLetter().equals("-") || matrixLetter[y][x].getLetter().equals(letter));
-        for (int i = 0; i < blockSteps.size(); i++)
-        {
-            if (blockSteps.get(i).getIndexLetter()==indexLetter)
-            {
+        for (int i = 0; i < blockSteps.size(); i++) {
+            if (blockSteps.get(i).getIndexLetter() == indexLetter) {
                 if (blockSteps.get(i).getLetter().equals(letter)
-                        &&blockSteps.get(i).getX1()==x
-                        &&blockSteps.get(i).getY1()==y
-                        &&blockSteps.get(i).getX2()==rewriteX(x,indexMoveArr)
-                        &&blockSteps.get(i).getY2()==rewriteY(y,indexMoveArr))
+                        && blockSteps.get(i).getX1() == x
+                        && blockSteps.get(i).getY1() == y
+                        && blockSteps.get(i).getX2() == rewriteX(x, indexMoveArr)
+                        && blockSteps.get(i).getY2() == rewriteY(y, indexMoveArr))
                     return false;
             }
         }
@@ -266,23 +247,20 @@ public class LogicController {
         return false;
     }
 
-    private int getIndexMove(double[] arr, double value)
-    {
-        for (int i = 0; i < arr.length-1; i++)
-        {
-            if (value>arr[i]&&value<arr[i+1])
+    private int getIndexMove(double[] arr, double value) {
+        for (int i = 0; i < arr.length - 1; i++) {
+            if (value > arr[i] && value < arr[i + 1])
                 return i;
         }
-        return arr.length-1;
+        return arr.length - 1;
     }
 
-    private double[] createProbabilityArr(int size)
-    {
-        double []probabilityArr = new double[size];
-        double delta = 1/(double)size;
-        probabilityArr[0]=delta;
+    private double[] createProbabilityArr(int size) {
+        double[] probabilityArr = new double[size];
+        double delta = 1 / (double) size;
+        probabilityArr[0] = delta;
         for (int i = 1; i < probabilityArr.length; i++)
-            probabilityArr[i]=probabilityArr[i-1]+delta;
+            probabilityArr[i] = probabilityArr[i - 1] + delta;
         return probabilityArr;
     }
 
@@ -294,28 +272,22 @@ public class LogicController {
         }
     }
 
-    public boolean checkStep(ArrayList<Point>trackButtons, Button[][]matrix) {
+    public boolean checkStep(ArrayList<Point> trackButtons, Button[][] matrix) {
         int counterLetters;
         StringBuilder word;
-        for (int i = 0; i < codeWords.size(); i++)
-        {
+        for (int i = 0; i < codeWords.size(); i++) {
             counterLetters = 0;
             word = new StringBuilder();
-            for (int j = 0; j < trackButtons.size(); j++)
-            {
-                if (trackButtons.size()==codeWords.get(i).length)
-                {
-                    if (matrix[trackButtons.get(j).y][trackButtons.get(j).x].getText().equals(codeWords.get(i)[j].getLetter()))
-                    {
+            for (int j = 0; j < trackButtons.size(); j++) {
+                if (trackButtons.size() == codeWords.get(i).length) {
+                    if (matrix[trackButtons.get(j).y][trackButtons.get(j).x].getText().equals(codeWords.get(i)[j].getLetter())) {
                         word.append(codeWords.get(i)[j].getLetter());
                         counterLetters++;
                     }
-                }
-                else j = trackButtons.size();
+                } else j = trackButtons.size();
             }
 
-            if (counterLetters==trackButtons.size()&&counterLetters!=0)
-            {
+            if (counterLetters == trackButtons.size() && counterLetters != 0) {
                 selectWord = word.toString();
                 vocabulary.remove(selectWord);
                 codeWords.remove(i);
@@ -329,12 +301,11 @@ public class LogicController {
         Random rand = new Random();
         vocabulary = new ArrayList<>(numberWords);
         ArrayList<String> buffer;
-        for (int i = 0; i < numberWords; i++)
-        {
+        for (int i = 0; i < numberWords; i++) {
             int random = rand.nextInt(path.length);
 
             FileInputStream fis = new FileInputStream(path[random]);
-            ObjectInputStream read = new ObjectInputStream (fis);
+            ObjectInputStream read = new ObjectInputStream(fis);
             buffer = (ArrayList) read.readObject();
             read.close();
             fis.close();

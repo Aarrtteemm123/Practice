@@ -3,6 +3,7 @@ package sample;
 import java.awt.*;
 
 public class Letter {
+
     private String letter;
     private Point point;
 
@@ -11,7 +12,7 @@ public class Letter {
 
     public Letter(String letter, int x, int y) {
         this.letter = letter;
-        this.point = new Point(x,y);
+        this.point = new Point(x, y);
     }
 
     public String getLetter() {

@@ -1,16 +1,17 @@
 package sample;
 
 public class MenuInfo {
+
     private Integer sizeMatrix;
     private Integer numberWords;
     private String player;
     private String complexity;
 
     public MenuInfo() {
-        sizeMatrix=0;
-        numberWords=0;
-        player="";
-        complexity="";
+        sizeMatrix = 0;
+        numberWords = 0;
+        player = "";
+        complexity = "";
     }
 
     public MenuInfo(int sizeMatrix, int numberWords, String player, String complexity) {

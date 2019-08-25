@@ -3,6 +3,7 @@ package sample;
 import java.awt.*;
 
 public class Move {
+
     private String letter;
     private int indexLetter;
     private Point point1;
@@ -11,8 +12,8 @@ public class Move {
     public Move(String letter, int indexLetter, int x1, int y1, int x2, int y2) {
         this.letter = letter;
         this.indexLetter = indexLetter;
-        this.point1 = new Point(x1,y1);
-        this.point2 = new Point(x2,y2);
+        this.point1 = new Point(x1, y1);
+        this.point2 = new Point(x2, y2);
     }
 
     public int getIndexLetter() {
@@ -59,6 +60,7 @@ public class Move {
         return point2.y;
     }
 
-    public void setY2(int y2) { this.point2.y = y2;
+    public void setY2(int y2) {
+        this.point2.y = y2;
     }
 }
